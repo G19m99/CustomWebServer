@@ -2,14 +2,17 @@
 
 public static class Utils
 {
-    public static string GetPathFromRequest(string? request)
+    public static (string method, string path) GetRequestInfo(string? request)
     {
-        string[] parts = request!.Split(' ');
-        if (parts.Length > 1)
+        request ??= "/";
+        string[] parts = request.Split(' ');
+        if (parts.Length > 2)
         {
-            return parts[1];
+            string method = parts[0];
+            string path = parts[1];
+            return (method, path);
         }
-        return "/";
+        throw new InvalidOperationException("Invalid HTTP request format");
     }
     public static string GenerateResponse(string statusCode, string contentType, string content)
     {

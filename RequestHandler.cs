@@ -9,7 +9,10 @@ internal class RequestHandler(string filesPath)
 
     public HttpResponse HandleRequest(string requestPath)
     {
-        return GetPathFromRequest(requestPath) switch
+        var (method, info) = GetRequestInfo(requestPath);
+        Console.WriteLine($"the method was {method} and info {info}");
+        if (method != "GET") return MethodNotAllowedRoute.HandleRequest();
+        return info switch
         {
             "/" or "/index.html" or "/index" => IndexRoute.HandleRequest(FilesPath),
             "/json" => JsonRoute.HandleRequest(FilesPath),
