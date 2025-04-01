@@ -1,8 +1,12 @@
-﻿namespace CustomWebServer;
+﻿using System.Text;
 
-public class HttpResponse(string statusCode, string contentType, string content)
+namespace CustomWebServer;
+
+public class HttpResponse
 {
-    public string StatusCode { get; } = statusCode ?? throw new ArgumentNullException(nameof(statusCode));
-    public string ContentType { get; } = contentType ?? throw new ArgumentNullException(nameof(contentType));
-    public string Content { get; } = content ?? throw new ArgumentNullException(nameof(content));
+    public string StatusCode { get; set; } = HttpStatusCodes.OK;
+    public string ContentType { get; set; } = HttpContentTypes.TextHtml;
+    public string Content { get; set; } = string.Empty;
+    public Dictionary<string, string> Headers { get; set; } = [];
+    public int ContentLength => Encoding.UTF8.GetByteCount(Content);
 }

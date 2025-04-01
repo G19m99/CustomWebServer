@@ -2,15 +2,15 @@
 
 namespace CustomWebServer.Routes;
 
-internal class JsonRoute
+internal class TimeRoute
 {
-    public static Task<HttpResponse> HandleRequestAsync(string path)
+    public static Task<HttpResponse> HandleRequestAsync()
     {
         var data = new
         {
-            message = "Hello from the server!",
-            timestamp = DateTime.Now.ToString(),
-            version = "1.0"
+            utc = DateTime.UtcNow.ToString("o"),
+            local = DateTime.Now.ToString("o"),
+            timezone = TimeZoneInfo.Local.DisplayName
         };
 
         string jsonContent = JsonSerializer.Serialize(data, options: new()

@@ -2,10 +2,27 @@
 
 internal class IndexRoute
 {
-    public static HttpResponse HandleRequest(string projectRoot)
+    public static Task<HttpResponse> HandleRequestAsync(string rootPath)
     {
-        string htmlPath = Path.Combine(projectRoot, "wwwroot", "temp.html");
-        string htmlIndexPage = File.ReadAllText(htmlPath);
-        return new HttpResponse("200 OK", "text/html", htmlIndexPage);
+        string filePath = Path.Combine(rootPath, "wwwroot", "temp.html");
+        string content;
+
+        try
+        {
+            content = File.ReadAllText(filePath);
+        }
+        catch (Exception)
+        {
+            //TODO: return a different response if not found with 404 status code
+            content = "<html><body><h1>Welcome to My Web Server</h1><p>Default page content.</p></body></html>";
+        }
+
+        return Task.FromResult(new HttpResponse
+        {
+            StatusCode = HttpStatusCodes.OK,
+            ContentType = HttpContentTypes.TextHtml,
+            Content = content
+        });
+
     }
 }

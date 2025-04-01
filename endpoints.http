@@ -1,0 +1,33 @@
+@base = http://localhost:8080
+
+### Test Root Route
+GET {{base}}/
+
+### Test Index Route (Explicit)
+GET {{base}}/index.html
+
+### Test Index Route (Without .html)
+GET {{base}}/index
+
+### Test JSON Route
+GET {{base}}/json
+
+### Test API Time Route
+GET {{base}}/api/time
+
+### Test JSON Route with Query Parameters
+GET {{base}}/json?param1=value1&param2=value2
+
+### Test API Time Route with Query Parameters
+GET {{base}}/api/time?timezone=UTC
+
+### Test Unsupported Method (POST on a GET-only route)
+POST {{base}}/json
+Content-Type: application/json
+
+{
+    "test": "data"
+}
+
+### Test Invalid Route
+GET {{base}}/nonexistent

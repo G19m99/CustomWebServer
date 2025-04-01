@@ -4,6 +4,11 @@ internal class NotFoundRoute
 {
     public static HttpResponse HandleRequest()
     {
-        return new HttpResponse("400 Not Found", "text/plain", "Not Found");
+        return new()
+        {
+            StatusCode = HttpStatusCodes.NotFound,
+            ContentType = HttpContentTypes.TextPlain,
+            Content = "Not Found"
+        };
     }
 }
