@@ -9,16 +9,19 @@ public class Server : IDisposable
     private static readonly IPAddress ServerIP = IPAddress.Any;
     private readonly int Port;
     private readonly TcpListener TcpListener;
-    private readonly string ProjectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
+    private readonly string ProjectRoot;
     private readonly RequestHandler requestHandler;
     private readonly CancellationTokenSource cancellationTokenSource;
-    private readonly int MaxConcurrentConnections = 20;
+    private readonly int MaxConcurrentConnections;
     private readonly SemaphoreSlim connectionLimiter;
     private bool isRunning;
     private bool disposed;
-    public Server(int port = 8080)
+    public Server(int port = 8080, string? projectRoot = null, int maxConcurrentConnections = 100)
     {
         Port = port;
+        ProjectRoot = projectRoot ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
+        MaxConcurrentConnections = maxConcurrentConnections;
+
         TcpListener = new TcpListener(ServerIP, Port);
         requestHandler = new(ProjectRoot);
         cancellationTokenSource = new CancellationTokenSource();
