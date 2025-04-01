@@ -137,6 +137,9 @@ public class Server : IDisposable
                 ClientIP = clientIp
             };
 
+            //Register user defined routes
+            Program.ConfigureRoutes(requestHandler);
+
             HttpResponse response = await requestHandler.HandleRequestAsync(httpContext);
 
             // Send the response

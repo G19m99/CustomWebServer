@@ -3,6 +3,26 @@ using CustomWebServer;
 
 class Program
 {
+    /// <summary>
+    /// User defined routes can be placed here
+    /// </summary>
+    public static void ConfigureRoutes(RequestHandler requestHandler)
+    {
+        // Sample added route with query string
+        requestHandler.AddRoute("GET", "/hello", async (context) =>
+        {
+            string name = context.QueryParameters.GetValueOrDefault("name", "Guest");
+            return new HttpResponse
+            {
+                StatusCode = "200 OK",
+                ContentType = "text/plain",
+                Content = $"Hello {name}"
+            };
+        });
+
+        // More routes can be added here...
+    }
+
     static async Task Main(string[] args)
     {
         int port = 8080;
@@ -22,6 +42,7 @@ class Program
             Console.WriteLine("Shutting down server...");
             cts.Cancel();
             e.Cancel = true;
+            server.Stop();
         };
 
         // Run the server

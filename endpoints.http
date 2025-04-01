@@ -31,3 +31,6 @@ Content-Type: application/json
 
 ### Test Invalid Route
 GET {{base}}/nonexistent
+
+### Test Added route using the AddRoute
+GET {{base}}/hello?name=World!
