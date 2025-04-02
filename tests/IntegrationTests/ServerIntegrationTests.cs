@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using static CustomWebServer.Utilities.Constants;
 
@@ -58,7 +59,7 @@ public class ServerIntegrationTests : IDisposable
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
 
         string body = await response.Content.ReadAsStringAsync();
-        var jsonDoc = JsonDocument.Parse(body);
+        JsonDocument jsonDoc = JsonDocument.Parse(body);
         Assert.True(jsonDoc.RootElement.TryGetProperty("message", out var _));
     }
 
@@ -73,7 +74,7 @@ public class ServerIntegrationTests : IDisposable
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
 
         string body = await response.Content.ReadAsStringAsync();
-        var jsonDoc = JsonDocument.Parse(body);
+        JsonDocument jsonDoc = JsonDocument.Parse(body);
         Assert.True(jsonDoc.RootElement.TryGetProperty("utc", out var _));
     }
 
@@ -108,9 +109,58 @@ public class ServerIntegrationTests : IDisposable
         Assert.Contains("<html>", body);
     }
 
-    //[Fact]
-    //public async Task TestQueryParameters()
-    //{
-    //    _server.Add
-    //}
+    [Fact]
+    public async Task TestQueryParameters()
+    {
+        // Arrange
+        _server.RequestHandler.AddRoute("GET", "/query-strings", async (context) =>
+        {
+            return new HttpResponse()
+            {
+                StatusCode = HttpStatusCodes.OK,
+                ContentType = HttpContentTypes.ApplicationJson,
+                Content = JsonSerializer.Serialize(context.QueryParameters)
+            };
+        });
+
+        // Act
+        HttpResponseMessage response = await _httpClient.GetAsync($"{BASE_URL}/query-strings?name=Hello&value=World!");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        string body = await response.Content.ReadAsStringAsync();
+        JsonDocument jsonDoc = JsonDocument.Parse(body);
+        Assert.True(jsonDoc.RootElement.TryGetProperty("name", out var nameProperty));
+        Assert.True(jsonDoc.RootElement.TryGetProperty("value", out var valueProperty));
+
+        string greeting = $"{nameProperty} {valueProperty}";
+        Assert.Equal("Hello World!", greeting);
+    }
+
+    [Fact]
+    public async Task TestPostRequest()
+    {
+        // Arrange
+        _server.RequestHandler.AddRoute("POST", "/submit-order", async (context) =>
+        {
+            return new HttpResponse()
+            {
+                StatusCode = HttpStatusCodes.Created,
+                ContentType = HttpContentTypes.TextPlain,
+                Content = $"Received order: {context.Body}"
+            };
+        });
+
+        // Act
+        StringContent orderContent = new("New PC", Encoding.UTF8, "text/plain");
+        HttpResponseMessage response = await _httpClient.PostAsync($"{BASE_URL}/submit-order", orderContent);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
+
+        string body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("New PC", body);
+    }
 }
