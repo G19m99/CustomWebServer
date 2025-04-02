@@ -117,6 +117,11 @@ public class RequestHandler
             {
                 throw new InvalidOperationException("Invalid HTTP request format");
             }
+
+            if (requestParts[0] == "POST")
+            {
+                context.Body = requestLines[^1];
+            }
         }
     }
 
