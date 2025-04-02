@@ -2,11 +2,9 @@
 
 A lightweight, extensible web server written in C# that demonstrates core HTTP server functionality and modern .NET practices.
 
+## Coding Challenges
 
-## Coding Challenges 
-
- - [Write your own Web Server](https://codingchallenges.fyi/challenges/challenge-webserver)
-
+- [Write your own Web Server](https://codingchallenges.fyi/challenges/challenge-webserver)
 
 ## Features
 
@@ -19,7 +17,6 @@ A lightweight, extensible web server written in C# that demonstrates core HTTP s
 - **Error Handling**: Comprehensive error handling and logging throughout
 
 ## Getting Started
-
 
 ### Running the Server
 
@@ -75,7 +72,7 @@ public class AuthenticationMiddleware : Middleware
     public override Task<HttpResponse> ProcessAsync(HttpContext context)
     {
         // Check for API key
-        if (context.Path.StartsWith("/api/") && 
+        if (context.Path.StartsWith("/api/") &&
             (!context.Headers.TryGetValue("API-Key", out var apiKey) || apiKey != "secret-key"))
         {
             return Task.FromResult(new HttpResponse {
@@ -84,7 +81,7 @@ public class AuthenticationMiddleware : Middleware
                 Content = "Invalid or missing API key"
             });
         }
-        
+
         // Continue to next middleware
         return Task.FromResult<HttpResponse>(null);
     }
@@ -118,13 +115,13 @@ await server.Start();
 server.Stop();
 ```
 
-## Testing - working on it
+## Testing
 
 The project includes comprehensive testing utilities:
 
-- **Unit Tests**: Test individual components
+- **Unit Tests**: Test individual components - WIP
 - **Integration Tests**: Test the complete request/response cycle
-- **Load Tests**: Verify performance under concurrent connections
+- **Load Tests**: Verify performance under concurrent connections - WIP
 
 Run tests using:
 
@@ -132,4 +129,8 @@ Run tests using:
 dotnet test
 ```
 
+Run load test
 
+```bash
+dotnet run --project loadTesting\LoadTesting.csproj
+```
