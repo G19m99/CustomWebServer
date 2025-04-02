@@ -3,7 +3,7 @@ using CustomWebServer.Middleware;
 
 namespace CustomWebServer;
 
-internal class RequestHandler
+public class RequestHandler
 {
     private readonly string _filesPath;
     private readonly Dictionary<string, Func<HttpContext, Task<HttpResponse>>> _routes;

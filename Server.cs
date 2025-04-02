@@ -16,6 +16,8 @@ public class Server : IDisposable
     private bool _isRunning;
     private bool _isDisposed;
 
+    public RequestHandler RequestHandler => _requestHandler;
+
     public Server(int port = 8080, string? projectRoot = null, int maxConcurrentConnections = 100)
     {
         _port = port;
@@ -135,9 +137,6 @@ public class Server : IDisposable
                 Headers = headers,
                 ClientIP = clientIp
             };
-
-            //Register user defined routes
-            Program.ConfigureRoutes(_requestHandler);
 
             HttpResponse response = await _requestHandler.HandleRequestAsync(httpContext);
 

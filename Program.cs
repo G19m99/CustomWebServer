@@ -35,6 +35,9 @@ class Program
 
         using Server server = new(port);
 
+        // Register custom routes
+        ConfigureRoutes(server.RequestHandler);
+
         // Setup cancellation token to handle server shut down
         CancellationTokenSource cts = new();
         Console.CancelKeyPress += (s, e) =>
