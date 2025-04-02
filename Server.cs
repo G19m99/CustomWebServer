@@ -6,47 +6,47 @@ namespace CustomWebServer;
 
 public class Server : IDisposable
 {
-    private static readonly IPAddress ServerIP = IPAddress.Any;
-    private readonly int Port;
-    private readonly TcpListener TcpListener;
-    private readonly string ProjectRoot;
-    private readonly RequestHandler requestHandler;
-    private readonly int MaxConcurrentConnections;
-    private readonly SemaphoreSlim connectionLimiter;
-    private bool isRunning;
-    private bool disposed;
+    private static readonly IPAddress _serverIP = IPAddress.Any;
+    private readonly int _port;
+    private readonly TcpListener _tcpListener;
+    private readonly string _projectRoot;
+    private readonly RequestHandler _requestHandler;
+    private readonly int _maxConcurrentConnections;
+    private readonly SemaphoreSlim _connectionLimiter;
+    private bool _isRunning;
+    private bool _isDisposed;
+
     public Server(int port = 8080, string? projectRoot = null, int maxConcurrentConnections = 100)
     {
-        Port = port;
-        ProjectRoot = projectRoot ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
-        MaxConcurrentConnections = maxConcurrentConnections;
+        _port = port;
+        _projectRoot = projectRoot ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
+        _maxConcurrentConnections = maxConcurrentConnections;
 
-        TcpListener = new TcpListener(ServerIP, Port);
-        requestHandler = new(ProjectRoot);
-        connectionLimiter = new(MaxConcurrentConnections);
-        isRunning = false;
+        _tcpListener = new TcpListener(_serverIP, _port);
+        _requestHandler = new(_projectRoot);
+        _connectionLimiter = new(_maxConcurrentConnections);
+        _isRunning = false;
     }
 
     public async Task Start(CancellationToken ct)
     {
-        if (isRunning)
+        if (_isRunning)
         {
             Console.WriteLine("server already running");
             return;
         }
         try
         {
-            TcpListener.Start();
-            isRunning = true;
-            Console.WriteLine($"Server started. Listening on {ServerIP}:{Port}");
+            _tcpListener.Start();
+            _isRunning = true;
+            Console.WriteLine($"Server started. Listening on {_serverIP}:{_port}");
 
             while (!ct.IsCancellationRequested)
             {
                 try
                 {
-
-                    await connectionLimiter.WaitAsync(ct);
-                    TcpClient client = await TcpListener.AcceptTcpClientAsync(ct).ConfigureAwait(false);
+                    await _connectionLimiter.WaitAsync(ct);
+                    TcpClient client = await _tcpListener.AcceptTcpClientAsync(ct).ConfigureAwait(false);
 
                     // Set timeout for idle connections
                     client.ReceiveTimeout = 30000; // 30 seconds
@@ -63,7 +63,6 @@ public class Server : IDisposable
                 {
                     Console.WriteLine($"Error accepting client: {ex.Message}");
                 }
-
             }
         }
         catch (Exception ex)
@@ -72,8 +71,8 @@ public class Server : IDisposable
         }
         finally
         {
-            isRunning = false;
-            TcpListener.Stop();
+            _isRunning = false;
+            _tcpListener.Stop();
         }
     }
 
@@ -138,9 +137,9 @@ public class Server : IDisposable
             };
 
             //Register user defined routes
-            Program.ConfigureRoutes(requestHandler);
+            Program.ConfigureRoutes(_requestHandler);
 
-            HttpResponse response = await requestHandler.HandleRequestAsync(httpContext);
+            HttpResponse response = await _requestHandler.HandleRequestAsync(httpContext);
 
             // Send the response
             await SendResponseAsync(writer, response);
@@ -162,7 +161,7 @@ public class Server : IDisposable
         finally
         {
             client.Close();
-            connectionLimiter.Release();
+            _connectionLimiter.Release();
             Console.WriteLine("Client disconnected.");
         }
     }
@@ -212,12 +211,12 @@ public class Server : IDisposable
 
     public void Stop()
     {
-        if (!isRunning)
+        if (!_isRunning)
         {
             Console.WriteLine("Server is not running.");
             return;
         }
-        TcpListener.Stop();
+        _tcpListener.Stop();
     }
 
     // Dispose when server shut down.
@@ -229,15 +228,15 @@ public class Server : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposed)
+        if (!_isDisposed)
         {
             if (disposing)
             {
-                if(isRunning) Stop();
-                connectionLimiter.Dispose();
+                if(_isRunning) Stop();
+                _connectionLimiter.Dispose();
             }
 
-            disposed = true;
+            _isDisposed = true;
         }
     }
 }

@@ -5,35 +5,35 @@ namespace CustomWebServer;
 
 internal class RequestHandler
 {
-    private readonly string FilesPath;
-    private readonly Dictionary<string, Func<HttpContext, Task<HttpResponse>>> routes;
-    private readonly List<BaseMiddleware> middlewares = [];
+    private readonly string _filesPath;
+    private readonly Dictionary<string, Func<HttpContext, Task<HttpResponse>>> _routes;
+    private readonly List<BaseMiddleware> _middlewares = [];
 
     public RequestHandler(string filesPath)
     {
-        FilesPath = filesPath;
-        routes = new Dictionary<string, Func<HttpContext, Task<HttpResponse>>>
+        _filesPath = filesPath;
+        _routes = new Dictionary<string, Func<HttpContext, Task<HttpResponse>>>
         {
-            { "GET /", async (context) => await IndexRoute.HandleRequestAsync(FilesPath) },
-            { "GET /index.html", async (context) => await IndexRoute.HandleRequestAsync(FilesPath) },
-            { "GET /index", async (context) => await IndexRoute.HandleRequestAsync(FilesPath) },
-            { "GET /json", async (context) => await JsonRoute.HandleRequestAsync(FilesPath) },
+            { "GET /", async (context) => await IndexRoute.HandleRequestAsync(_filesPath) },
+            { "GET /index.html", async (context) => await IndexRoute.HandleRequestAsync(_filesPath) },
+            { "GET /index", async (context) => await IndexRoute.HandleRequestAsync(_filesPath) },
+            { "GET /json", async (context) => await JsonRoute.HandleRequestAsync(_filesPath) },
             { "GET /api/time", async (context) => await TimeRoute.HandleRequestAsync() }
         };
 
         // Add default middlewares
         UseMiddleware(new LoggingMiddleware());
-        UseMiddleware(new StaticFilesMiddleware(FilesPath));
+        UseMiddleware(new StaticFilesMiddleware(_filesPath));
     }
 
     public void UseMiddleware(BaseMiddleware middleware)
     {
-        middlewares.Add(middleware);
+        _middlewares.Add(middleware);
     }
 
     public void AddRoute(string method, string path, Func<HttpContext, Task<HttpResponse>> handler)
     {
-        routes[$"{method.ToUpper()} {path}"] = handler;
+        _routes[$"{method.ToUpper()} {path}"] = handler;
     }
 
     public async Task<HttpResponse> HandleRequestAsync(HttpContext context)
@@ -44,7 +44,7 @@ internal class RequestHandler
             ParseRequest(context);
 
             // Run middlewares
-            foreach (var middleware in middlewares)
+            foreach (var middleware in _middlewares)
             {
                 HttpResponse middlewareResponse = await middleware.ProcessAsync(context);
                 if (middlewareResponse != null)
@@ -55,7 +55,7 @@ internal class RequestHandler
 
             // Check if route exists
             string routeKey = $"{context.Method} {context.Path}";
-            if (routes.TryGetValue(routeKey, out var handler))
+            if (_routes.TryGetValue(routeKey, out var handler))
             {
                 return await handler(context);
             }
@@ -63,7 +63,7 @@ internal class RequestHandler
             // Check for static file
             if (context.Method == "GET")
             {
-                string filePath = Path.Combine(FilesPath, "public", context.Path.TrimStart('/'));
+                string filePath = Path.Combine(_filesPath, "public", context.Path.TrimStart('/'));
                 if (File.Exists(filePath))
                 {
                     return await ServeFileAsync(filePath);
@@ -140,7 +140,7 @@ internal class RequestHandler
         }
     }
 
-    private async Task<HttpResponse> ServeFileAsync(string filePath)
+    private static async Task<HttpResponse> ServeFileAsync(string filePath)
     {
         string extension = Path.GetExtension(filePath).ToLower();
         string contentType = HttpContentTypes.GetContentTypeByFileExtension(extension);
