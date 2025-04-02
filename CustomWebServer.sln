@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomWebServer", "src\Cust
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomwebServer.Tests", "tests\CustomwebServer.Tests.csproj", "{99EDB0CD-5531-43D5-99BA-98D23EA241B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadTesting", "loadTesting\LoadTesting.csproj", "{8CD44319-86C3-4127-B788-578036883175}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{99EDB0CD-5531-43D5-99BA-98D23EA241B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99EDB0CD-5531-43D5-99BA-98D23EA241B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99EDB0CD-5531-43D5-99BA-98D23EA241B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CD44319-86C3-4127-B788-578036883175}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CD44319-86C3-4127-B788-578036883175}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CD44319-86C3-4127-B788-578036883175}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CD44319-86C3-4127-B788-578036883175}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
