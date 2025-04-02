@@ -11,7 +11,6 @@ public class Server : IDisposable
     private readonly TcpListener TcpListener;
     private readonly string ProjectRoot;
     private readonly RequestHandler requestHandler;
-    private readonly CancellationTokenSource cancellationTokenSource;
     private readonly int MaxConcurrentConnections;
     private readonly SemaphoreSlim connectionLimiter;
     private bool isRunning;
@@ -24,12 +23,11 @@ public class Server : IDisposable
 
         TcpListener = new TcpListener(ServerIP, Port);
         requestHandler = new(ProjectRoot);
-        cancellationTokenSource = new CancellationTokenSource();
         connectionLimiter = new(MaxConcurrentConnections);
         isRunning = false;
     }
 
-    public async Task Start()
+    public async Task Start(CancellationToken ct)
     {
         if (isRunning)
         {
@@ -42,19 +40,19 @@ public class Server : IDisposable
             isRunning = true;
             Console.WriteLine($"Server started. Listening on {ServerIP}:{Port}");
 
-            while (!cancellationTokenSource.Token.IsCancellationRequested)
+            while (!ct.IsCancellationRequested)
             {
                 try
                 {
 
-                    await connectionLimiter.WaitAsync(cancellationTokenSource.Token);
-                    TcpClient client = await TcpListener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    await connectionLimiter.WaitAsync(ct);
+                    TcpClient client = await TcpListener.AcceptTcpClientAsync(ct).ConfigureAwait(false);
 
                     // Set timeout for idle connections
                     client.ReceiveTimeout = 30000; // 30 seconds
                     client.SendTimeout = 30000;    // 30 seconds
 
-                    _ = Task.Run(() => HandleClientAsync(client));
+                    _ = Task.Run(() => HandleClientAsync(client), ct);
                 }
                 catch (OperationCanceledException)
                 {
@@ -76,7 +74,6 @@ public class Server : IDisposable
         {
             isRunning = false;
             TcpListener.Stop();
-            Console.WriteLine("Server stopped.");
         }
     }
 
@@ -220,12 +217,10 @@ public class Server : IDisposable
             Console.WriteLine("Server is not running.");
             return;
         }
-
-        Console.WriteLine("Stopping server...");
-        cancellationTokenSource.Cancel();
+        TcpListener.Stop();
     }
 
-    //Implement IDisposable so we can use the server with 'using' statement
+    // Dispose when server shut down.
     public void Dispose()
     {
         Dispose(true);
@@ -238,8 +233,7 @@ public class Server : IDisposable
         {
             if (disposing)
             {
-                Stop();
-                cancellationTokenSource.Dispose();
+                if(isRunning) Stop();
                 connectionLimiter.Dispose();
             }
 

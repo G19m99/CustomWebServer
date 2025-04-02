@@ -35,29 +35,28 @@ class Program
 
         using Server server = new(port);
 
-        // Setup cancellation token to handle Ctrl+C
+        // Setup cancellation token to handle server shut down
         CancellationTokenSource cts = new();
         Console.CancelKeyPress += (s, e) =>
         {
-            Console.WriteLine("Shutting down server...");
-            cts.Cancel();
+            Console.WriteLine("Server shutdown requested.");
             e.Cancel = true;
-            server.Stop();
+            cts.Cancel();
         };
 
         // Run the server
-        Task serverTask = server.Start();
+        Task serverTask = server.Start(cts.Token);
 
         try
         {
             await serverTask;
         }
-        catch (OperationCanceledException)
+        catch (Exception ex)
         {
-            Console.WriteLine("Server shutdown requested.");
+            Console.WriteLine("Exception: {0}", ex.Message);
         }
 
-        Console.WriteLine("Server has stopped. Press any key to exit.");
+        Console.WriteLine("Server stopped. Press any key to exit.");
         Console.ReadKey();
     }
 }
